@@ -7,270 +7,256 @@
     <style>
         :root {
             --gold: #d4af37;
-            --dark-blue: #001f3f;
+            --navy: #050a1a;
+            --panel: #101a35;
             --white: #ffffff;
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--dark-blue);
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--navy);
             color: var(--white);
-            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SETUP SCREEN */
+        #setup-screen {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 100vh; background: radial-gradient(circle, #101a35 0%, #050a1a 100%);
+        }
+        .setup-box {
+            background: var(--panel); padding: 40px; border-radius: 25px;
+            border: 2px solid var(--gold); text-align: center;
+        }
+
+        /* GAME LAYOUT */
+        #game-screen { display: none; display: grid; grid-template-columns: 320px 1fr; height: 100vh; }
+
+        /* LEFT PANEL: TEAMS */
+        .sidebar {
+            background: var(--panel);
+            border-right: 2px solid var(--gold);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+        .score-card {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .score-row { display: flex; justify-content: space-between; align-items: center; }
+        .score-val { font-size: 1.8rem; font-weight: bold; color: var(--gold); }
+
+        /* MAIN AREA */
+        .main-area {
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-        }
-        header {
-            text-align: center;
-            padding: 20px;
-            border-bottom: 2px solid var(--gold);
-            width: 100%;
-        }
-        .game-container {
-            display: flex;
-            justify-content: space-around;
-            width: 90%;
-            margin-top: 20px;
-            gap: 20px;
-        }
-        .board {
+            justify-content: center;
             position: relative;
-            width: 400px;
-            height: 400px;
+        }
+
+        /* WHEEL */
+        .wheel-container { position: relative; margin-bottom: 50px; }
+        .fortune-wheel {
+            width: 480px; height: 480px;
+            border: 10px solid var(--gold);
             border-radius: 50%;
-            border: 5px solid var(--gold);
-            background: radial-gradient(circle, #003366, #001f3f);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: #000;
+            position: relative;
         }
-        .sector {
-            position: absolute;
-            width: 50%;
-            height: 2px;
-            background: var(--gold);
-            transform-origin: left center;
-            left: 50%;
+        .arrow {
+            position: absolute; top: 50%; left: 50%;
+            width: 200px; height: 6px; background: #ff4444;
+            transform-origin: left center; z-index: 10;
+            transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1);
         }
-        .question-trigger {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background: var(--white);
-            color: var(--dark-blue);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-            border: 2px solid var(--gold);
+        .arrow::after {
+            content: ''; position: absolute; right: -20px; top: -12px;
+            border-left: 35px solid #ff4444; border-top: 15px solid transparent; border-bottom: 15px solid transparent;
         }
-        .question-trigger:hover {
-            background: var(--gold);
-            transform: scale(1.1);
+        .envelope {
+            position: absolute; width: 42px; height: 42px;
+            background: var(--gold); color: #000;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; border-radius: 4px; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        .controls {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
+        .envelope.used { background: #333; color: #666; cursor: default; }
+
+        /* TIMER BOX */
+        .timer-container {
+            position: absolute; top: 20px; right: 20px;
+            background: #000; border: 2px solid #ff0000;
+            padding: 15px; border-radius: 15px; text-align: center;
         }
-        .score-board {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            border: 1px solid var(--gold);
-            padding: 10px;
-        }
-        .timer {
-            font-size: 3em;
-            color: #ff4136;
-            margin: 10px 0;
-        }
+        #timer { font-size: 3rem; color: #ff0000; font-family: monospace; margin-bottom: 10px; }
+
+        /* MODAL */
         .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--white);
-            color: #000;
-            padding: 30px;
-            border-radius: 15px;
-            width: 60%;
-            z-index: 100;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100;
+            align-items: center; justify-content: center;
         }
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 99;
+        .modal-content {
+            background: var(--panel); width: 70%; max-width: 800px;
+            padding: 40px; border-radius: 20px; border: 2px solid var(--gold); text-align: center;
         }
+
         button {
-            padding: 10px 20px;
-            background: var(--gold);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 5px;
+            padding: 10px 20px; border-radius: 20px; border: none;
+            background: var(--gold); font-weight: bold; cursor: pointer; transition: 0.2s;
         }
-        .answer-text {
-            display: none;
-            margin-top: 15px;
-            padding: 10px;
-            background: #e1f5fe;
-            border-left: 5px solid #03a9f4;
-        }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .btn-control { background: #444; color: white; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>НЕ? ҚАЙДА? ҚАШАН?</h1>
-    <p>Интеллектуалды ойын</p>
-</header>
+<div id="setup-screen">
+    <div class="setup-box">
+        <h1 style="color: var(--gold);">ИНТЕЛЛЕКТУАЛДЫ ОЙЫН</h1>
+        <p>Командалар санын таңдаңыз:</p>
+        <input type="number" id="team-count" value="2" min="1" max="8" style="font-size: 1.5rem; padding: 5px; width: 60px; text-align: center;">
+        <br><br>
+        <button onclick="startGame()" style="padding: 15px 40px; font-size: 1.1rem;">БАСТАУ</button>
+    </div>
+</div>
 
-<div class="game-container">
-    <div class="board" id="gameBoard">
+<div id="game-screen" style="display: none;">
+    <div class="sidebar" id="team-list">
+        <h3 style="color: var(--gold); text-align: center; border-bottom: 1px solid var(--gold); padding-bottom: 10px;">КОМАНДАЛАР</h3>
+    </div>
+
+    <div class="main-area">
+        <div class="timer-container">
+            <div id="timer">01:00</div>
+            <div style="display: flex; gap: 5px;">
+                <button class="btn-control" onclick="toggleTimer()">Старт</button>
+                <button class="btn-control" onclick="resetTimer()">Сброс</button>
+            </div>
         </div>
 
-    <div class="controls">
-        <div class="score-board">
-            <div>Білгірлер: <span id="score1">0</span></div>
-            <div>Көрермендер: <span id="score2">0</span></div>
+        <div class="wheel-container">
+            <div class="arrow" id="wheel-arrow"></div>
+            <div class="fortune-wheel" id="main-wheel"></div>
         </div>
         
-        <div class="timer" id="timerDisplay">01:00</div>
-        <button onclick="startTimer()">Таймерді қосу</button>
-        <button onclick="resetTimer()">Сброс</button>
-        
-        <div style="margin-top: 20px;">
-            <h3>Ұпай қосу:</h3>
-            <button onclick="changeScore('score1', 1)">Білгірлер +1</button>
-            <button onclick="changeScore('score2', 1)">Көрермендер +1</button>
+        <button onclick="spinWheel()" style="padding: 15px 50px; font-size: 1.2rem; letter-spacing: 2px;">АЙНАЛДЫРУ</button>
+    </div>
+</div>
+
+<div class="modal" id="q-modal">
+    <div class="modal-content">
+        <h2 id="q-title" style="color: var(--gold);">Сұрақ</h2>
+        <p id="q-txt" style="font-size: 1.8rem; line-height: 1.4;"></p>
+        <div id="ans-box" style="display: none; padding: 20px; background: rgba(255,255,255,0.05); color: #00ff00; font-size: 1.5rem; margin: 20px 0; border-radius: 10px;"></div>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="document.getElementById('ans-box').style.display='block'" style="background: #555; color: white;">Жауап</button>
+            <button onclick="closeModal()">Жабу</button>
         </div>
     </div>
 </div>
 
-<div class="modal-overlay" id="overlay"></div>
-<div class="modal" id="qModal">
-    <h2 id="modalTitle">Сұрақ</h2>
-    <p id="questionText"></p>
-    <div id="answerText" class="answer-text"></div>
-    <br>
-    <button onclick="showAnswer()">Жауапты көрсету</button>
-    <button onclick="closeModal()">Жабу</button>
-</div>
-
 <script>
-    const questions = {
-        1: { q: "Осы қала атауының мағынасы 'желдің қаласы' деп аударылады, бірақ бұл атау саяси желілерге байланысты пайда болған. Бұл қай қала?", a: "Чикаго" },
-        2: { q: "Қай елде жылына тек бір күн гүлдейтін 'Черри Блоссом' фестивалі өтеді?", a: "Жапония" },
-        3: { q: "Бұл қала әлемдегі ең үлкен жасанды аралға (Пальма Жумейра) құрылған. Қай қала?", a: "Дубай" },
-        4: { q: "Қай елде үш ресми астана бар (Претория, Кейптаун, Блумфонтейн)?", a: "Оңтүстік Африка Республикасы" },
-        5: { q: "Әлемдегі ең үлкен кітапхана жүйесі (170 млн элемент) қай қалада орналасқан?", a: "Вашингтон (Конгресс кітапханасы)" },
-        6: { q: "Еуропа мен Азия арасындағы көпір болып табылатын, тарихи сауда жолдарының қиылысындағы қала?", a: "Стамбул" },
-        7: { q: "ЮНЕСКО-ның дүниежүзілік мұра тізіміне енген объектілердің ең көп саны орналасқан ел?", a: "Италия" },
-        8: { q: "Әлемдегі ең ірі диамант (алмаз) өндіруші ел?", a: "Ботсвана" },
-        9: { q: "Қазақстанның қай қаласы 'Солтүстіктің маржаны' деп аталады?", a: "Петропавл" },
-        10: { q: "Қазақстанның оңтүстігіндегі әлемдегі ең ірі уран кен орны қалай аталады?", a: "Мыңқұдық" },
-        11: { q: "Африкадағы ең үлкен және дүниежүзінде үшінші орындағы ішкі су айдыны?", a: "Виктория көлі" },
-        12: { q: "Оңтүстік Африка Республикасының ішінде толығымен қоршалған анклав-мемлекет?", a: "Лесото" }
-    };
+    const questions = [
+        { id: 1, q: "Осы қала атауының мағынасы 'желдің қаласы' деп аударылады. Американың қай қаласы?", a: "Чикаго" },
+        { id: 2, q: "Жапонияда жылына тек бір күн гүлдейтін 'Черри Блоссом' фестивалі қай елде өтеді?", a: "Жапония (Сакура)" },
+        { id: 3, q: "Дизайны пальма пішінінде жасалған әлемдегі ең үлкен жасанды арал қай қалада?", a: "Дубай (Пальма Жумейра)" },
+        { id: 4, q: "Қай елде үш ресми астана бар: Претория, Кейптаун және Блумфонтейн?", a: "Оңтүстік Африка Республикасы" },
+        { id: 5, q: "Әлемдегі ең үлкен кітапхана жүйесі (170 млн элемент) қай қалада орналасқан?", a: "Вашингтон (Конгресс кітапханасы)" },
+        { id: 6, q: "Еуропа мен Азия арасындағы көпір болып табылатын тарихи қала?", a: "Стамбул" },
+        { id: 7, q: "Дүниежүзілік мұражайлар мен ЮНЕСКО нысандары ең көп орналасқан ел?", a: "Италия" },
+        { id: 8, q: "Әлемдегі ең ірі диамант (алмаз) өндіруші елдердің бірі?", a: "Ботсвана" },
+        { id: 9, q: "Қазақстанның қай қаласы 'Солтүстіктің маржаны' деп аталады?", a: "Петропавл" },
+        { id: 10, q: "Қазақстанның оңтүстігінде орналасқан әлемдегі ең ірі уран кен орны?", a: "Мыңқұдық" },
+        { id: 11, q: "Африканың үш елінің шекарасындағы әлемдегі ең ірі ішкі су айдыны?", a: "Виктория көлі" },
+        { id: 12, q: "Бір елдің ішінде орналасқан анклав-мемлекет (ОАР ішінде)?", a: "Лесото" }
+    ];
 
-    // Создание игрового поля
-    const board = document.getElementById('gameBoard');
-    for (let i = 1; i <= 12; i++) {
-        const angle = (i - 1) * (360 / 12);
-        
-        // Линии секторов
-        const sector = document.createElement('div');
-        sector.className = 'sector';
-        sector.style.transform = `rotate(${angle}deg)`;
-        board.appendChild(sector);
-
-        // Кнопки вопросов
-        const btn = document.createElement('div');
-        btn.className = 'question-trigger';
-        btn.innerText = i;
-        
-        const radius = 160;
-        const x = Math.cos((angle - 90) * Math.PI / 180) * radius;
-        const y = Math.sin((angle - 90) * Math.PI / 180) * radius;
-        
-        btn.style.left = `calc(50% + ${x}px - 20px)`;
-        btn.style.top = `calc(50% + ${y}px - 20px)`;
-        
-        btn.onclick = () => openQuestion(i);
-        board.appendChild(btn);
-    }
-
-    // Логика модального окна
-    function openQuestion(id) {
-        document.getElementById('modalTitle').innerText = `Сұрақ №${id}`;
-        document.getElementById('questionText').innerText = questions[id].q;
-        document.getElementById('answerText').innerText = `Жауабы: ${questions[id].a}`;
-        document.getElementById('answerText').style.display = 'none';
-        document.getElementById('qModal').style.display = 'block';
-        document.getElementById('overlay').style.display = 'block';
-    }
-
-    function showAnswer() {
-        document.getElementById('answerText').style.display = 'block';
-    }
-
-    function closeModal() {
-        document.getElementById('qModal').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
-    }
-
-    // Таймер
+    let scores = [];
     let timeLeft = 60;
-    let timerId = null;
+    let timerInt;
+    let isRunning = false;
 
-    function startTimer() {
-        if (timerId) return;
-        timerId = setInterval(() => {
-            timeLeft--;
-            updateTimerDisplay();
-            if (timeLeft <= 0) {
-                clearInterval(timerId);
-                timerId = null;
-                alert("Уақыт аяқталды!");
-            }
-        }, 1000);
+    function startGame() {
+        const count = document.getElementById('team-count').value;
+        const list = document.getElementById('team-list');
+        for(let i=0; i<count; i++) {
+            scores.push(0);
+            list.innerHTML += `
+                <div class="score-card">
+                    <span style="font-weight: bold;">Команда ${i+1}</span>
+                    <div class="score-row">
+                        <button onclick="updateScore(${i},-1)" style="background:#cc0000; padding:5px 15px;">-</button>
+                        <span class="score-val" id="sc-${i}">0</span>
+                        <button onclick="updateScore(${i},1)" style="background:#008800; padding:5px 15px;">+</button>
+                    </div>
+                </div>`;
+        }
+
+        const wheel = document.getElementById('main-wheel');
+        questions.forEach((q, i) => {
+            const env = document.createElement('div');
+            env.className = 'envelope';
+            env.id = `env-${q.id}`;
+            env.innerText = q.id;
+            const angle = i * 30;
+            const r = 190;
+            env.style.left = `calc(50% + ${Math.cos((angle-90)*Math.PI/180)*r}px - 21px)`;
+            env.style.top = `calc(50% + ${Math.sin((angle-90)*Math.PI/180)*r}px - 21px)`;
+            env.onclick = () => openQuestion(q.id);
+            wheel.appendChild(env);
+        });
+
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'grid';
     }
 
-    function resetTimer() {
-        clearInterval(timerId);
-        timerId = null;
-        timeLeft = 60;
-        updateTimerDisplay();
+    function spinWheel() {
+        const arrow = document.getElementById('wheel-arrow');
+        const deg = 1440 + Math.random() * 3600;
+        arrow.style.transform = `rotate(${deg}deg)`;
     }
 
-    function updateTimerDisplay() {
-        const mins = Math.floor(timeLeft / 60);
-        const secs = timeLeft % 60;
-        document.getElementById('timerDisplay').innerText = 
-            `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    function openQuestion(id) {
+        const q = questions.find(x => x.id === id);
+        const env = document.getElementById(`env-${id}`);
+        if(env.classList.contains('used')) return;
+        document.getElementById('q-title').innerText = `Сұрақ №${id}`;
+        document.getElementById('q-txt').innerText = q.q;
+        document.getElementById('ans-box').innerText = `Жауабы: ${q.a}`;
+        document.getElementById('ans-box').style.display = 'none';
+        document.getElementById('q-modal').style.display = 'flex';
+        env.classList.add('used');
     }
 
-    // Счет
-    function changeScore(elementId, delta) {
-        const el = document.getElementById(elementId);
-        let current = parseInt(el.innerText);
-        el.innerText = current + delta;
+    function closeModal() { document.getElementById('q-modal').style.display = 'none'; resetTimer(); }
+    function updateScore(i, v) { scores[i]+=v; document.getElementById(`sc-${i}`).innerText = scores[i]; }
+
+    function toggleTimer() {
+        if(isRunning) { clearInterval(timerInt); }
+        else {
+            timerInt = setInterval(() => {
+                timeLeft--;
+                const s = timeLeft % 60;
+                document.getElementById('timer').innerText = `00:${s < 10 ? '0'+s : s}`;
+                if(timeLeft <= 0) { clearInterval(timerInt); alert("Уақыт бітті!"); }
+            }, 1000);
+        }
+        isRunning = !isRunning;
     }
+
+    function resetTimer() { clearInterval(timerInt); isRunning = false; timeLeft = 60; document.getElementById('timer').innerText = "01:00"; }
 </script>
 
 </body>
